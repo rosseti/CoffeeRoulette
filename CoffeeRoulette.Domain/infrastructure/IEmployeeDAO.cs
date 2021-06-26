@@ -8,7 +8,5 @@ namespace CoffeeRoulette.Domain
         IEnumerable<Employee> GetAll();
 
         void Add(Employee employee);
-        void Delete(Employee employee);
-        void Update(Employee employee);
     }
 }

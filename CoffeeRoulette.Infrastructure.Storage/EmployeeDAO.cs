@@ -1,34 +1,49 @@
 ﻿using CoffeeRoulette.Domain;
+using LiteDB;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CoffeeRoulette.Infrastructure.Storage
 {
     public class EmployeeDAO : IEmployeeDAO
     {
-        public void Add(Employee employee)
+        private readonly string dbPath;
+
+        public EmployeeDAO(string dbPath)
         {
-            throw new NotImplementedException();
+            this.dbPath = dbPath;
         }
 
-        public void Delete(Employee employee)
+        public void Add(Employee employee)
         {
-            throw new NotImplementedException();
+            using LiteDatabase db = new LiteDatabase(this.dbPath);
+            db.GetCollection<Employee>().Insert(employee);
         }
 
         public Employee Get(int id)
         {
-            throw new NotImplementedException();
+            return Execute<Employee>((collection) =>
+            {
+                return collection.Find(e => e.Id == id).FirstOrDefault();
+            });
         }
 
         public IEnumerable<Employee> GetAll()
         {
-            throw new NotImplementedException();
+            return Execute((collection) => collection.FindAll().ToList());
         }
 
-        public void Update(Employee employee)
+        private void Execute(Action<ILiteCollection<Employee>> action)
         {
-            throw new NotImplementedException();
+            using LiteDatabase db = new LiteDatabase(this.dbPath);
+            action(db.GetCollection<Employee>());
+        }
+
+        private T Execute<T>(Func<ILiteCollection<Employee>, T> action)
+        {
+            using LiteDatabase db = new LiteDatabase(this.dbPath);
+            return action(db.GetCollection<Employee>());
         }
     }
 }
